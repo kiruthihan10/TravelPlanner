@@ -1,0 +1,41 @@
+name: CI/CD with Django Tests, Pylint, and Coverage
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test_and_coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python environment
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.9.13'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pylint
+          pip install pylint-django
+          pip install coverage
+
+      - name: Run migrations
+        run: |
+          python manage.py makemigrations
+          python manage.py migrate
+
+      - name: Run tests with coverage
+        run: |
+          coverage run manage.py test
+          coverage report -m --fail-under 100
+          coverage html -d coverage_html --skip-covered --skip-empty
+
+      - name: Run Pylint
+        run: |
+          pylint **/*.py --django-settings-module=skapt_cable_company.settings --recursive=y --ignore=migrations # Replace with the name of your Django app directory
