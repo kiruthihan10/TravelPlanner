@@ -38,4 +38,4 @@ jobs:
 
       - name: Run Pylint
         run: |
-          pylint **/*.py --django-settings-module=skapt_cable_company.settings --recursive=y --ignore=migrations # Replace with the name of your Django app directory
+          pylint **/*.py --django-settings-module=travelPlanner.settings --recursive=y --ignore=migrations # Replace with the name of your Django app directory

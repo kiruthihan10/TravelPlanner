@@ -1,2 +1,2 @@
 [run]
-omit = manage.py, skapt_cable_company/settings.py
+omit = manage.py, travelPlanner/settings.py
