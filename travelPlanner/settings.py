@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "country.apps.CountryConfig",
     "hotel.apps.HotelConfig",
     "plane.apps.PlaneConfig",
+    "plan.apps.PlanConfig",
 ]
 
 MIDDLEWARE = [
