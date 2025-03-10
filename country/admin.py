@@ -13,6 +13,7 @@ Usage:
     This module is used to make the Country model manageable through the Django admin interface.
 """
 
-from common.models import Country
+from common.models import Country, City
 
 admin.site.register(Country)
+admin.site.register(City)
