@@ -40,7 +40,10 @@ class Country(models.Model):
         Returns:
             QuerySet: A QuerySet containing all Plan objects that include the current country.
         """
-        return Plan.objects.filter(countries=self)
+        return Plan.objects.filter(
+            models.Q(flightplan__flight__departure__country=self)
+            | models.Q(flightplan__flight__arrival__country=self)
+        ).distinct()
 
 
 class City(models.Model):
@@ -201,17 +204,13 @@ class Airport(models.Model):
         """
         Retrieve plans associated with the current instance.
 
-        This method filters `FlightPlan` objects where the flight's departure or arrival
-        matches the current instance. It then retrieves `Plan` objects that are associated
-        with these filtered flight plans.
-
         Returns:
             QuerySet: A Django QuerySet containing the filtered `Plan` objects.
         """
-        flight_plans = FlightPlan.objects.filter(
-            models.Q(flight__departure=self) | models.Q(flight__arrival=self)
-        )
-        return Plan.objects.filter(flight__in=flight_plans)
+        return Plan.objects.filter(
+            models.Q(flightplan__flight__departure=self)
+            | models.Q(flightplan__flight__arrival=self)
+        ).distinct()
 
 
 class Flight(models.Model):
@@ -229,6 +228,7 @@ class Flight(models.Model):
         plans (QuerySet): Property that returns a queryset of Plan objects associated with the departure airport's country.
         duration_in_hours (float): Property that returns the duration of the flight in hours.
     """
+
     name = models.CharField(max_length=100, primary_key=True)
     departure = models.ForeignKey(
         Airport, on_delete=models.CASCADE, related_name="departure"
@@ -246,13 +246,13 @@ class Flight(models.Model):
     @property
     def plans(self):
         """
-        Retrieve all plans that include the departure country.
-
+        Retrieves all Plan objects associated with the current flight.
         Returns:
-            QuerySet: A Django QuerySet containing Plan objects that have the same 
-            departure country as the current instance's departure country.
+            QuerySet: A Django QuerySet containing all Plan objects that are linked
+                      to the current flight through the flightplan relationship.
         """
-        return Plan.objects.filter(countries=self.departure.country)
+
+        return Plan.objects.filter(flightplan__flight=self)
 
     @property
     def duration_in_hours(self):
@@ -284,6 +284,7 @@ class Plan(models.Model):
     Raises:
         ValueError: If there are no planes in the plan when calculating the duration.
     """
+
     name = models.CharField(max_length=100, primary_key=True)
     version = models.IntegerField(default=1)
     rooms = models.ManyToManyField(Room)
@@ -295,6 +296,7 @@ class Plan(models.Model):
         Attributes:
             unique_together (tuple): Ensures that the combination of 'name' and 'version' fields is unique across the table.
         """
+
         unique_together = ("name", "version")
 
     @property
@@ -323,9 +325,7 @@ class Plan(models.Model):
         Returns:
             QuerySet: A QuerySet containing all Flight objects associated with the current plan.
         """
-        flightPlans = FlightPlan.objects.filter(plan=self)
-        planes = Flight.objects.filter(flight__in=flightPlans)
-        return planes
+        return Flight.objects.filter(flightplan__plan=self)
 
     @property
     def sightseeings(self):
@@ -339,7 +339,9 @@ class Plan(models.Model):
             QuerySet: A QuerySet containing all Sightseeing objects associated with the current plan.
         """
         sightseeingPlans = SightseeingPlan.objects.filter(plan=self)
-        sightseeings = Sightseeing.objects.filter(sightseeing__in=sightseeingPlans)
+        sightseeings = []
+        for sightseeingPlan in sightseeingPlans:
+            sightseeings.append(sightseeingPlan.sightseeing)
         return sightseeings
 
     @property
@@ -347,7 +349,7 @@ class Plan(models.Model):
         """
         Calculate the total cost of the travel plan.
 
-        This method sums up the costs of all rooms, sightseeings, and flights 
+        This method sums up the costs of all rooms, sightseeings, and flights
         associated with the travel plan.
 
         Returns:
@@ -356,7 +358,7 @@ class Plan(models.Model):
         cost = 0
         for room in self.rooms.all():
             cost += room.cost
-        for sightseeing in self.sightseeings.all():
+        for sightseeing in self.sightseeings:
             cost += sightseeing.cost
         for flight in self.planes:
             cost += flight.cost
@@ -397,6 +399,7 @@ class FlightPlan(models.Model):
     Properties:
         countries (list): A list containing the departure and arrival countries of the flight.
     """
+
     flight = models.ForeignKey(Flight, on_delete=models.CASCADE)
     plan = models.ForeignKey(Plan, on_delete=models.CASCADE)
     order = models.IntegerField()
@@ -409,6 +412,7 @@ class FlightPlan(models.Model):
             unique_together (tuple): Ensures that the combination of 'flight' and 'plan' is unique.
             ordering (list): Specifies the default ordering for the model, based on the 'order' field.
         """
+
         unique_together = ("flight", "plan")
         ordering = ["order"]
 
@@ -437,6 +441,7 @@ class SightseeingPlan(models.Model):
         unique_together (tuple): Ensures that the combination of sightseeing and plan is unique.
         ordering (list): Orders the SightseeingPlan instances by the 'order' field.
     """
+
     sightseeing = models.ForeignKey(Sightseeing, on_delete=models.CASCADE)
     plan = models.ForeignKey(Plan, on_delete=models.CASCADE)
     order = models.IntegerField()
@@ -449,6 +454,7 @@ class SightseeingPlan(models.Model):
             unique_together (tuple): Ensures that the combination of 'sightseeing' and 'plan' is unique.
             ordering (list): Specifies the default ordering of records by the 'order' field.
         """
+
         unique_together = ("sightseeing", "plan")
         ordering = ["order"]
 
