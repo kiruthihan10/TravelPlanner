@@ -40,6 +40,8 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "common.apps.CommonConfig",
     "country.apps.CountryConfig",
+    "hotel.apps.HotelConfig",
+    "plane.apps.PlaneConfig",
 ]
 
 MIDDLEWARE = [
