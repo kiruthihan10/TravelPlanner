@@ -60,6 +60,9 @@ class CountryModelTest(TestCase):
         self.assertIn(self.plan2, plans_country2)
         self.assertNotIn(self.plan1, plans_country2)
 
+    def test_string(self):
+        self.assertEqual(str(self.country1), "Country1")
+
 
 class CityModelTest(TestCase):
     def setUp(self):
@@ -395,6 +398,12 @@ class PlanModelTests(TestCase):
             self.flight2.arrival_date_time - self.flight1.departure_date_time
         ).days
         self.assertEqual(duration, expected_duration)
+
+    def test_duration_in_days_no_flights(self):
+        # Create a plan with no flights
+        empty_plan = Plan.objects.create(name="EmptyPlan", version=1)
+        with self.assertRaises(ValueError):
+            empty_plan.duration_in_days
 
 
 class FlightPlanModelTest(TestCase):
