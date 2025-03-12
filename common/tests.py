@@ -71,8 +71,6 @@ class BaseModelTest(TestCase):
         return countries
 
     def create_n_cities(self, n: int, countries: List[Country]) -> List[City]:
-        if countries is None:
-            countries = self.create_n_countries(n)
         cities = []
         for i in range(n):
             city = City.objects.create(
@@ -83,8 +81,6 @@ class BaseModelTest(TestCase):
         return cities
 
     def create_n_sightseeings(self, n: int, cities: List[City]) -> List[Sightseeing]:
-        if cities is None:
-            cities = self.create_n_cities(n)
         sightseeings = []
         for i in range(n):
             sightseeing = Sightseeing.objects.create(
