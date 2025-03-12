@@ -27,6 +27,9 @@ the correctness of model attributes, relationships, and methods.
 """
 
 from datetime import date, datetime, timedelta
+import random
+import string
+from typing import List, Union
 from django.test import TestCase
 
 from .models import (
@@ -41,6 +44,163 @@ from .models import (
     FlightPlan,
     SightseeingPlan,
 )
+
+
+class BaseModelTest(TestCase):
+    """
+    Base Test Case for TravelPlanner application models.
+    """
+
+    def generate_random_string(self, length=10):
+        """
+        Generate a random string of specified length.
+        """
+
+        return "".join(random.choices(string.ascii_letters, k=length))
+
+    def create_n_countries(self, n):
+        """
+        Create n Country instances.
+        """
+        countries = []
+        for _ in range(n):
+            country = Country.objects.create(
+                name=f"Country_{self.generate_random_string()}"
+            )
+            countries.append(country)
+        return countries
+
+    def create_n_cities(self, n: int, countries: Union[List[Country], None] = None):
+        if countries is None:
+            countries = self.create_n_countries(n)
+        cities = []
+        for i in range(n):
+            city = City.objects.create(
+                name=f"City_{self.generate_random_string()}",
+                country=countries[i % len(countries)],
+            )
+            cities.append(city)
+        return cities
+
+    def create_n_sightseeings(self, n: int, cities: Union[List[City], None] = None):
+        if cities is None:
+            cities = self.create_n_cities(n)
+        sightseeings = []
+        for i in range(n):
+            sightseeing = Sightseeing.objects.create(
+                name=f"Sightseeing_{self.generate_random_string()}",
+                city=cities[i % len(cities)],
+                cost=random.uniform(50.0, 200.0),
+                description=self.generate_random_string(50),
+                rating=random.uniform(3.0, 5.0),
+            )
+            sightseeings.append(sightseeing)
+        return sightseeings
+
+    def create_n_hotels(self, n: int, cities: Union[List[City], None] = None):
+        if cities is None:
+            cities = self.create_n_cities(n)
+        hotels = []
+        for i in range(n):
+            hotel = Hotel.objects.create(
+                name=f"Hotel_{self.generate_random_string()}",
+                city=cities[i % len(cities)],
+                rating=random.uniform(3.0, 5.0),
+            )
+            hotels.append(hotel)
+        return hotels
+
+    def create_n_rooms(self, n: int, hotels: Union[List[Hotel], None] = None):
+        if hotels is None:
+            hotels = self.create_n_hotels(n)
+        rooms = []
+        for i in range(n):
+            room = Room.objects.create(
+                hotel=hotels[i % len(hotels)],
+                room_type=random.choice(["Single", "Double", "Suite"]),
+                from_date=date.today(),
+                to_date=date.today() + timedelta(days=random.randint(1, 10)),
+                cost=random.uniform(50.0, 200.0),
+            )
+            rooms.append(room)
+        return rooms
+
+    def create_n_airports(self, n: int, countries: Union[List[Country], None] = None):
+        if countries is None:
+            countries = self.create_n_countries(n)
+        airports = []
+        for i in range(n):
+            airport = Airport.objects.create(
+                name=f"Airport_{self.generate_random_string()}",
+                country=countries[i % n],
+            )
+            airports.append(airport)
+        return airports
+
+    def create_n_flights(self, n: int, airports: Union[List[Airport], None] = None):
+        if airports is None:
+            airports = self.create_n_airports(n)
+        flights = []
+        for i in range(n):
+            flight = Flight.objects.create(
+                name=f"Flight_{self.generate_random_string()}",
+                departure=airports[i % len(airports)],
+                arrival=airports[(i + 1) % len(airports)],
+                cost=random.uniform(100.0, 500.0),
+                departure_date_time=datetime.now(),
+                arrival_date_time=datetime.now()
+                + timedelta(hours=random.randint(1, 10)),
+            )
+            flights.append(flight)
+        return flights
+
+    def create_n_plans(self, n: int):
+        plans = []
+        for _ in range(n):
+            plan = Plan.objects.create(name=f"Plan_{self.generate_random_string()}")
+            plans.append(plan)
+        return plans
+
+    def create_n_flight_plans(
+        self,
+        n: int,
+        flights: Union[List[Flight], None] = None,
+        plans: Union[List[Plan], None] = None,
+        same_plan: bool = False,
+    ):
+        if flights is None:
+            flights = self.create_n_flights(n)
+        if plans is None:
+            plans = self.create_n_plans(n)
+        flight_plans = []
+        for i in range(n):
+            flight_plan = FlightPlan.objects.create(
+                flight=flights[i % len(flights)],
+                plan=plans[i % len(plans)],
+                order=i + 1,
+            )
+            flight_plans.append(flight_plan)
+        return flight_plans
+
+    def create_n_sightseeing_plans(
+        self,
+        n: int,
+        sightseeings: Union[List[Sightseeing], None] = None,
+        plans: Union[List[Plan], None] = None,
+    ):
+        if sightseeings is None:
+            sightseeings = self.create_n_sightseeings(n)
+        if plans is None:
+            plans = self.create_n_plans(n)
+        sightseeing_plans = []
+        for i in range(n):
+            sightseeing_plan = SightseeingPlan.objects.create(
+                sightseeing=sightseeings[i % len(sightseeings)],
+                plan=plans[i % len(plans)],
+                order=i + 1,
+            )
+            sightseeing_plans.append(sightseeing_plan)
+        return sightseeing_plans
 
 
 class CountryModelTest(TestCase):
@@ -584,7 +744,7 @@ class FlightModelTest(TestCase):
         self.assertEqual(self.flight.duration_in_hours, 2)
 
 
-class PlanModelTests(TestCase):
+class PlanModelTests(BaseModelTest):
     """
     Test suite for the Plan model.
     This test suite includes the following tests:
@@ -613,92 +773,24 @@ class PlanModelTests(TestCase):
             - Two sightseeing plans, each associated with a sightseeing spot and the plan
         """
 
-        self.countries = [
-            Country.objects.create(name="Country1"),
-            Country.objects.create(name="Country2"),
-        ]
-
-        self.cities = [
-            City.objects.create(name="City1", country=self.countries[0]),
-            City.objects.create(name="City2", country=self.countries[1]),
-        ]
-
-        self.sightseeings = [
-            Sightseeing.objects.create(
-                name="Sightseeing1",
-                city=self.cities[0],
-                cost=100.0,
-                description="Description1",
-                rating=4.5,
-            ),
-            Sightseeing.objects.create(
-                name="Sightseeing2",
-                city=self.cities[1],
-                cost=150.0,
-                description="Description2",
-                rating=4.0,
-            ),
-        ]
-
-        self.rooms = [
-            Room.objects.create(
-                hotel=Hotel.objects.create(
-                    name="Hotel1", city=self.cities[0], rating=4.0
-                ),
-                room_type="Single",
-                from_date=date(2023, 1, 1),
-                to_date=date(2023, 1, 5),
-                cost=500.0,
-            ),
-            Room.objects.create(
-                hotel=Hotel.objects.create(
-                    name="Hotel2", city=self.cities[1], rating=3.5
-                ),
-                room_type="Double",
-                from_date=date(2023, 1, 6),
-                to_date=date(2023, 1, 10),
-                cost=800.0,
-            ),
-        ]
+        self.countries = self.create_n_countries(2)
+        self.cities = self.create_n_cities(2, self.countries)
+        self.sightseeings = self.create_n_sightseeings(2, self.cities)
+        self.hotels = self.create_n_hotels(2, self.cities)
+        self.rooms = self.create_n_rooms(2, self.hotels)
+        self.airports = self.create_n_airports(2, self.countries)
+        self.flights = self.create_n_flights(2, self.airports)
+        self.plan = self.create_n_plans(1)[0]
 
         # Create flights
-        self.flight1 = Flight.objects.create(
-            name="Flight1",
-            departure=Airport.objects.create(
-                name="Airport1", country=self.countries[0]
-            ),
-            arrival=Airport.objects.create(name="Airport2", country=self.countries[1]),
-            cost=300.0,
-            departure_date_time=datetime(2023, 1, 1, 10, 0),
-            arrival_date_time=datetime(2023, 1, 1, 14, 0),
-        )
-        self.flight2 = Flight.objects.create(
-            name="Flight2",
-            departure=Airport.objects.create(
-                name="Airport3", country=self.countries[1]
-            ),
-            arrival=Airport.objects.create(name="Airport4", country=self.countries[1]),
-            cost=350.0,
-            departure_date_time=datetime(2023, 1, 10, 16, 0),
-            arrival_date_time=datetime(2023, 1, 10, 20, 0),
-        )
+        self.flight1 = self.flights[0]
+        self.flight2 = self.flights[1]
 
-        # Create plan
-        self.plan = Plan.objects.create(name="Plan1", version=1)
+        self.create_n_flight_plans(2, [self.flight1, self.flight2], [self.plan])
+        self.create_n_sightseeing_plans(2, self.sightseeings, [self.plan])
+
         self.plan.rooms.add(self.rooms[0], self.rooms[1])
         self.plan = Plan.objects.get(pk=self.plan.pk)
-
-        # Create flight plans
-        FlightPlan.objects.create(flight=self.flight1, plan=self.plan, order=1)
-        FlightPlan.objects.create(flight=self.flight2, plan=self.plan, order=2)
-
-        # Create sightseeing plans
-        SightseeingPlan.objects.create(
-            sightseeing=self.sightseeings[0], plan=self.plan, order=1
-        )
-        SightseeingPlan.objects.create(
-            sightseeing=self.sightseeings[1], plan=self.plan, order=2
-        )
 
     def test_countries(self):
         """
@@ -785,7 +877,7 @@ class PlanModelTests(TestCase):
         # Create a plan with no flights
         empty_plan = Plan.objects.create(name="EmptyPlan", version=1)
         with self.assertRaises(ValueError) as error:
-            empty_plan.duration_in_days
+            _ = empty_plan.duration_in_days
         self.assertEqual(
             str(error.exception),
             "No planes in the plan",
