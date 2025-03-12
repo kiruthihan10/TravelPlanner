@@ -164,6 +164,15 @@ class CityModelTest(TestCase):
 
 
 class SightseeingModelTest(TestCase):
+    """
+    Test case for the Sightseeing model.
+    This test case includes the following tests:
+    - Setting up the test environment with a test country, city, and sightseeing object.
+    - Testing the creation of a sightseeing object with the correct attributes.
+    - Testing the string representation of the sightseeing object.
+    - Testing that the sightseeing object's country matches the expected country.
+    """
+
     def setUp(self):
         """
         Set up the test environment.
@@ -775,8 +784,12 @@ class PlanModelTests(TestCase):
         """
         # Create a plan with no flights
         empty_plan = Plan.objects.create(name="EmptyPlan", version=1)
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ValueError) as error:
             empty_plan.duration_in_days
+        self.assertEqual(
+            str(error.exception),
+            "No planes in the plan",
+        )
 
 
 class FlightPlanModelTest(TestCase):
