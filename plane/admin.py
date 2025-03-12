@@ -1,5 +1,3 @@
-from django.contrib import admin
-
 """
 Admin configuration for the TravelPlanner application.
 This module registers the Airport and Flight models with the Django admin site,
@@ -12,6 +10,9 @@ Modules:
     admin - Django's admin module for registering models.
     common.models - Module containing the Airport and Flight models.
 """
+
+from django.contrib import admin
+
 
 from common.models import Airport, Flight
 

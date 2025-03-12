@@ -1,5 +1,3 @@
-from django.contrib import admin
-
 """
 This module registers the Country model with the Django admin site.
 Modules:
@@ -12,6 +10,9 @@ Classes:
 Usage:
     This module is used to make the Country model manageable through the Django admin interface.
 """
+
+from django.contrib import admin
+
 
 from common.models import Country, City, Sightseeing
 

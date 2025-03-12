@@ -1,5 +1,3 @@
-from typing import Set
-
 """
 This module defines the models for the TravelPlanner application.
 Models:
@@ -14,7 +12,9 @@ Models:
     FlightPlan: Represents a relationship between a flight and a plan with an order.
     SightseeingPlan: Represents a relationship between a sightseeing spot and a plan with an order.
 """
+
 from django.db import models
+from typing import Set
 
 
 class Country(models.Model):
@@ -307,11 +307,11 @@ class Plan(models.Model):
         Returns:
             Set[Country]: A set of countries from the departure and arrival locations of the flight plans.
         """
-        flightPlans = FlightPlan.objects.filter(plan=self)
+        flight_plans = FlightPlan.objects.filter(plan=self)
         countries = set()
-        for flightPlan in flightPlans:
-            countries.add(flightPlan.flight.departure.country)
-            countries.add(flightPlan.flight.arrival.country)
+        for flight_plan in flight_plans:
+            countries.add(flight_plan.flight.departure.country)
+            countries.add(flight_plan.flight.arrival.country)
         return countries
 
     @property
@@ -338,10 +338,10 @@ class Plan(models.Model):
         Returns:
             QuerySet: A QuerySet containing all Sightseeing objects associated with the current plan.
         """
-        sightseeingPlans = SightseeingPlan.objects.filter(plan=self)
+        sightseeing_plans = SightseeingPlan.objects.filter(plan=self)
         sightseeings = []
-        for sightseeingPlan in sightseeingPlans:
-            sightseeings.append(sightseeingPlan.sightseeing)
+        for sightseeing_plan in sightseeing_plans:
+            sightseeings.append(sightseeing_plan.sightseeing)
         return sightseeings
 
     @property
@@ -434,7 +434,7 @@ class SightseeingPlan(models.Model):
     """
     SightseeingPlan model represents the relationship between a sightseeing activity and a travel plan.
     Attributes:
-        sightseeing (ForeignKey): A reference to the Sightseeing model. When the referenced Sightseeing is deleted, this relationship will also be deleted.
+        sightseeing (ForeignKey): A reference to the Sightseeing model. When the referenced Sightseeing is deleted, relationship will also be deleted.
         plan (ForeignKey): A reference to the Plan model. When the referenced Plan is deleted, this relationship will also be deleted.
         order (IntegerField): An integer representing the order of the sightseeing activity within the plan.
     Meta:

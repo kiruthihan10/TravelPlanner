@@ -1,4 +1,33 @@
+"""
+Unit tests for the TravelPlanner application models.
+This module contains unit tests for the following models:
+- Country
+- City
+- Sightseeing
+- Hotel
+- Room
+- Airport
+- Flight
+- Plan
+- FlightPlan
+- SightseeingPlan
+Each test case class is responsible for testing a specific model and its related functionality.
+The test cases include setup methods to create test data and various test methods to verify
+the correctness of model attributes, relationships, and methods.
+    CountryModelTest: Tests for the Country model and its associations with plans.
+    CityModelTest: Unit tests for the City model.
+    SightseeingModelTest: Unit tests for the Sightseeing model.
+    HotelModelTest: Tests for the Hotel model.
+    RoomModelTest: Unit tests for the Room model.
+    AirportModelTest: Test suite for the Airport model and related entities.
+    FlightModelTest: Unit tests for the Flight model.
+    PlanModelTests: Test suite for the Plan model.
+    FlightPlanModelTest: Test suite for the FlightPlan model.
+    SightseeingPlanModelTest: Unit tests for the SightseeingPlan model.
+"""
+
 from django.test import TestCase
+
 from .models import (
     Country,
     City,
@@ -199,7 +228,7 @@ class HotelModelTest(TestCase):
     """
     Tests for the Hotel model.
     This test case includes the following tests:
-    - `test_rooms`: Verifies that the correct number of rooms associated with the hotel is returned and that the rooms are the ones created in the setup.
+    - `test_rooms`: Verifies that the correct number of rooms associated with the hotel is returned and are the ones created in the setup.
     - `test_hotel_str`: Checks the string representation of the hotel.
     - `test_hotel_country`: Ensures that the hotel is associated with the correct country.
     Setup:
@@ -375,6 +404,7 @@ class AirportModelTest(TestCase):
         test_airport_str():
             Tests the string representation of an airport.
     """
+
     def setUp(self):
         """
         Set up the test environment by creating necessary objects for testing.
@@ -483,6 +513,7 @@ class FlightModelTest(TestCase):
         test_flight_duration_in_hours(self):
             Tests the duration of the flight in hours.
     """
+
     def setUp(self):
         """
         Set up the test environment by creating necessary objects.
@@ -567,7 +598,7 @@ class PlanModelTests(TestCase):
 
     def setUp(self):
         """
-        Set up the test environment by creating instances of Country, City, Sightseeing, Hotel, Room, Airport, Flight, Plan, FlightPlan, and SightseeingPlan models.
+        Set up the test environment by creating instances of required models.
         Creates:
             - Two countries
             - Two cities, each associated with a country
@@ -731,9 +762,9 @@ class PlanModelTests(TestCase):
         """
         Test the duration_in_days method of the plan.
 
-        This test calculates the expected duration in days by subtracting the 
-        departure date and time of the first flight from the arrival date and 
-        time of the second flight. It then asserts that the duration returned 
+        This test calculates the expected duration in days by subtracting the
+        departure date and time of the first flight from the arrival date and
+        time of the second flight. It then asserts that the duration returned
         by the plan's duration_in_days method matches the expected duration.
         """
         duration = self.plan.duration_in_days
@@ -764,6 +795,7 @@ class FlightPlanModelTest(TestCase):
     - `test_flight_plan_ordering`: Checks that FlightPlan instances are ordered correctly by the 'order' field.
     - `test_flight_plan_countries_property`: Tests the 'countries' property of the FlightPlan model to ensure it includes the correct countries.
     """
+
     def setUp(self):
         """
         Set up the test environment for the TravelPlanner application.
@@ -855,14 +887,15 @@ class FlightPlanModelTest(TestCase):
 class SightseeingPlanModelTest(TestCase):
     """
     Unit tests for the SightseeingPlan model.
-    This test case ensures that the SightseeingPlan model is correctly created and 
+    This test case ensures that the SightseeingPlan model is correctly created and
     associated with the appropriate Sightseeing and Plan instances.
     Methods:
-        setUp(): Sets up the test environment by creating instances of Country, City, 
+        setUp(): Sets up the test environment by creating instances of Country, City,
                  Sightseeing, Plan, and SightseeingPlan models.
-        test_sightseeing_plan_creation(): Tests the creation of a SightseeingPlan 
+        test_sightseeing_plan_creation(): Tests the creation of a SightseeingPlan
                                           instance and verifies its attributes.
     """
+
     def setUp(self):
         """
         Set up test data for the TravelPlanner application.
@@ -870,7 +903,7 @@ class SightseeingPlanModelTest(TestCase):
         This method creates the following objects:
         - A Country object named "TestCountry".
         - A City object named "TestCity" associated with the created Country.
-        - A Sightseeing object named "TestSightseeing" associated with the created City, with a cost of 100.0, a description of "TestDescription", and a rating of 4.5.
+        - A Sightseeing object named "TestSightseeing" with the created City, a cost of 100.0, description of "TestDescription", a rating of 4.5.
         - A Plan object named "TestPlan" with version 1.
         - A SightseeingPlan object associating the created Sightseeing and Plan objects, with an order of 1.
         """

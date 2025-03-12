@@ -1,5 +1,3 @@
-from django.contrib import admin
-
 """
 This module registers the Hotel and Room models with the Django admin site.
 Imports:
@@ -9,6 +7,9 @@ Functionality:
     admin.site.register(Hotel): Registers the Hotel model with the Django admin site.
     admin.site.register(Room): Registers the Room model with the Django admin site.
 """
+
+from django.contrib import admin
+
 
 from common.models import Hotel, Room
 

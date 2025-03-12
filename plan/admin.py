@@ -1,4 +1,3 @@
-from django.contrib import admin
 """
 This module registers the Plan, FlightPlan, and SightseeingPlan models
 with the Django admin site, allowing them to be managed through the
@@ -12,6 +11,9 @@ Registers:
     FlightPlan: The model for flight plans.
     SightseeingPlan: The model for sightseeing plans.
 """
+
+from django.contrib import admin
+
 
 from common.models import Plan, FlightPlan, SightseeingPlan
 
