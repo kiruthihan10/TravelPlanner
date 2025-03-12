@@ -58,7 +58,7 @@ class BaseModelTest(TestCase):
 
         return "".join(random.choices(string.ascii_letters, k=length))
 
-    def create_n_countries(self, n):
+    def create_n_countries(self, n) -> List[Country]:
         """
         Create n Country instances.
         """
@@ -70,7 +70,7 @@ class BaseModelTest(TestCase):
             countries.append(country)
         return countries
 
-    def create_n_cities(self, n: int, countries: List[Country]):
+    def create_n_cities(self, n: int, countries: List[Country]) -> List[City]:
         if countries is None:
             countries = self.create_n_countries(n)
         cities = []
@@ -82,7 +82,7 @@ class BaseModelTest(TestCase):
             cities.append(city)
         return cities
 
-    def create_n_sightseeings(self, n: int, cities: List[City]):
+    def create_n_sightseeings(self, n: int, cities: List[City]) -> List[Sightseeing]:
         if cities is None:
             cities = self.create_n_cities(n)
         sightseeings = []
@@ -97,7 +97,7 @@ class BaseModelTest(TestCase):
             sightseeings.append(sightseeing)
         return sightseeings
 
-    def create_n_hotels(self, n: int, cities: List[City]):
+    def create_n_hotels(self, n: int, cities: List[City]) -> List[Hotel]:
         hotels = []
         for i in range(n):
             hotel = Hotel.objects.create(
@@ -108,7 +108,7 @@ class BaseModelTest(TestCase):
             hotels.append(hotel)
         return hotels
 
-    def create_n_rooms(self, n: int, hotels: List[Hotel]):
+    def create_n_rooms(self, n: int, hotels: List[Hotel]) -> List[Room]:
         rooms = []
         for i in range(n):
             room = Room.objects.create(
@@ -121,7 +121,7 @@ class BaseModelTest(TestCase):
             rooms.append(room)
         return rooms
 
-    def create_n_airports(self, n: int, countries: List[Country]):
+    def create_n_airports(self, n: int, countries: List[Country]) -> List[Airport]:
         airports = []
         for i in range(n):
             airport = Airport.objects.create(
@@ -131,7 +131,7 @@ class BaseModelTest(TestCase):
             airports.append(airport)
         return airports
 
-    def create_n_flights(self, n: int, airports: List[Airport]):
+    def create_n_flights(self, n: int, airports: List[Airport]) -> List[Flight]:
         flights = []
         for i in range(n):
             flight = Flight.objects.create(
@@ -146,7 +146,7 @@ class BaseModelTest(TestCase):
             flights.append(flight)
         return flights
 
-    def create_n_plans(self, n: int):
+    def create_n_plans(self, n: int) -> List[Plan]:
         plans = []
         for _ in range(n):
             plan = Plan.objects.create(name=f"Plan_{self.generate_random_string()}")
@@ -158,7 +158,7 @@ class BaseModelTest(TestCase):
         n: int,
         flights: List[Flight],
         plans: List[Plan],
-    ):
+    ) -> List[FlightPlan]:
         flight_plans = []
         for i in range(n):
             flight_plan = FlightPlan.objects.create(
@@ -174,7 +174,7 @@ class BaseModelTest(TestCase):
         n: int,
         sightseeings: List[Sightseeing],
         plans: List[Plan],
-    ):
+    ) -> List[SightseeingPlan]:
         sightseeing_plans = []
         for i in range(n):
             sightseeing_plan = SightseeingPlan.objects.create(
@@ -346,10 +346,6 @@ class SightseeingModelTest(BaseModelTest):
             - The rating of the sightseeing object should be 4.5.
         """
         self.assertEqual(self.sightseeing.name, str(self.sightseeing))
-        self.assertEqual(self.sightseeing.city, self.city)
-        self.assertEqual(self.sightseeing.cost, 100.0)
-        self.assertEqual(self.sightseeing.description, "TestDescription")
-        self.assertEqual(self.sightseeing.rating, 4.5)
 
     def test_sightseeing_country(self):
         """

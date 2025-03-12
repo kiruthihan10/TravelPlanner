@@ -59,6 +59,9 @@ class City(models.Model):
     name = models.CharField(max_length=100, primary_key=True)
     country = models.ForeignKey(Country, on_delete=models.CASCADE)
 
+    def __str__(self) -> str:
+        return self.name
+
 
 class Sightseeing(models.Model):
     """
