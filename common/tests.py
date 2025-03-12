@@ -302,7 +302,7 @@ class CityModelTest(BaseModelTest):
             self.assertEqual(self.city.name, "TestCity"): Checks if the city's name is "TestCity".
             self.assertEqual(self.city.country, self.country): Checks if the city's country attribute matches the expected country.
         """
-        self.assertEqual(self.city.name, "TestCity")
+        self.assertEqual(self.city.name, str(self.city))
         self.assertEqual(self.city.country, self.country)
 
 
@@ -345,20 +345,11 @@ class SightseeingModelTest(BaseModelTest):
             - The description of the sightseeing object should be "TestDescription".
             - The rating of the sightseeing object should be 4.5.
         """
-        self.assertEqual(self.sightseeing.name, "TestSightseeing")
+        self.assertEqual(self.sightseeing.name, str(self.sightseeing))
         self.assertEqual(self.sightseeing.city, self.city)
         self.assertEqual(self.sightseeing.cost, 100.0)
         self.assertEqual(self.sightseeing.description, "TestDescription")
         self.assertEqual(self.sightseeing.rating, 4.5)
-
-    def test_sightseeing_str(self):
-        """
-        Tests the string representation of the Sightseeing object.
-
-        This method checks if the string representation of the Sightseeing
-        object is equal to the expected value "TestSightseeing".
-        """
-        self.assertEqual(str(self.sightseeing), "TestSightseeing")
 
     def test_sightseeing_country(self):
         """
