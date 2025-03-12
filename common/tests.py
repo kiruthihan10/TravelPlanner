@@ -805,14 +805,14 @@ class FlightPlanModelTest(TestCase):
         self.flight1 = Flight.objects.create(
             name="Flight1",
             departure=Airport.objects.create(name="Airport1", country=self.country1),
-            arrival=Airport.objects.create(name="Airport2", country=self.country1),
+            arrival=Airport.objects.create(name="Airport2", country=self.country2),
             cost=100.0,
             departure_date_time="2023-01-01T10:00:00Z",
             arrival_date_time="2023-01-01T14:00:00Z",
         )
         self.flight2 = Flight.objects.create(
             name="Flight2",
-            departure=Airport.objects.create(name="Airport3", country=self.country1),
+            departure=Airport.objects.create(name="Airport3", country=self.country2),
             arrival=Airport.objects.create(name="Airport4", country=self.country1),
             cost=150.0,
             departure_date_time="2023-01-10T16:00:00Z",
