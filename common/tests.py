@@ -70,7 +70,7 @@ class BaseModelTest(TestCase):
             countries.append(country)
         return countries
 
-    def create_n_cities(self, n: int, countries: Union[List[Country], None] = None):
+    def create_n_cities(self, n: int, countries: List[Country]):
         if countries is None:
             countries = self.create_n_countries(n)
         cities = []
@@ -82,7 +82,7 @@ class BaseModelTest(TestCase):
             cities.append(city)
         return cities
 
-    def create_n_sightseeings(self, n: int, cities: Union[List[City], None] = None):
+    def create_n_sightseeings(self, n: int, cities: List[City]):
         if cities is None:
             cities = self.create_n_cities(n)
         sightseeings = []
@@ -97,9 +97,7 @@ class BaseModelTest(TestCase):
             sightseeings.append(sightseeing)
         return sightseeings
 
-    def create_n_hotels(self, n: int, cities: Union[List[City], None] = None):
-        if cities is None:
-            cities = self.create_n_cities(n)
+    def create_n_hotels(self, n: int, cities: List[City]):
         hotels = []
         for i in range(n):
             hotel = Hotel.objects.create(
@@ -110,9 +108,7 @@ class BaseModelTest(TestCase):
             hotels.append(hotel)
         return hotels
 
-    def create_n_rooms(self, n: int, hotels: Union[List[Hotel], None] = None):
-        if hotels is None:
-            hotels = self.create_n_hotels(n)
+    def create_n_rooms(self, n: int, hotels: List[Hotel]):
         rooms = []
         for i in range(n):
             room = Room.objects.create(
@@ -125,9 +121,7 @@ class BaseModelTest(TestCase):
             rooms.append(room)
         return rooms
 
-    def create_n_airports(self, n: int, countries: Union[List[Country], None] = None):
-        if countries is None:
-            countries = self.create_n_countries(n)
+    def create_n_airports(self, n: int, countries: List[Country]):
         airports = []
         for i in range(n):
             airport = Airport.objects.create(
@@ -137,9 +131,7 @@ class BaseModelTest(TestCase):
             airports.append(airport)
         return airports
 
-    def create_n_flights(self, n: int, airports: Union[List[Airport], None] = None):
-        if airports is None:
-            airports = self.create_n_airports(n)
+    def create_n_flights(self, n: int, airports: List[Airport]):
         flights = []
         for i in range(n):
             flight = Flight.objects.create(
@@ -164,14 +156,9 @@ class BaseModelTest(TestCase):
     def create_n_flight_plans(
         self,
         n: int,
-        flights: Union[List[Flight], None] = None,
-        plans: Union[List[Plan], None] = None,
-        same_plan: bool = False,
+        flights: List[Flight],
+        plans: List[Plan],
     ):
-        if flights is None:
-            flights = self.create_n_flights(n)
-        if plans is None:
-            plans = self.create_n_plans(n)
         flight_plans = []
         for i in range(n):
             flight_plan = FlightPlan.objects.create(
@@ -185,13 +172,9 @@ class BaseModelTest(TestCase):
     def create_n_sightseeing_plans(
         self,
         n: int,
-        sightseeings: Union[List[Sightseeing], None] = None,
-        plans: Union[List[Plan], None] = None,
+        sightseeings: List[Sightseeing],
+        plans: List[Plan],
     ):
-        if sightseeings is None:
-            sightseeings = self.create_n_sightseeings(n)
-        if plans is None:
-            plans = self.create_n_plans(n)
         sightseeing_plans = []
         for i in range(n):
             sightseeing_plan = SightseeingPlan.objects.create(
@@ -203,7 +186,7 @@ class BaseModelTest(TestCase):
         return sightseeing_plans
 
 
-class CountryModelTest(TestCase):
+class CountryModelTest(BaseModelTest):
     """
     Tests for the Country model and its associations with plans.
     Classes:
@@ -287,7 +270,7 @@ class CountryModelTest(TestCase):
         self.assertEqual(str(self.country1), "Country1")
 
 
-class CityModelTest(TestCase):
+class CityModelTest(BaseModelTest):
     """
     Unit tests for the City model.
     Classes:
@@ -307,7 +290,7 @@ class CityModelTest(TestCase):
         - self.city: A City object with the name "TestCity" and associated with self.country.
         """
         self.country = Country.objects.create(name="TestCountry")
-        self.city = City.objects.create(name="TestCity", country=self.country)
+        self.city = self.create_n_cities(1, [self.country])[0]
 
     def test_city_creation(self):
         """
@@ -323,7 +306,7 @@ class CityModelTest(TestCase):
         self.assertEqual(self.city.country, self.country)
 
 
-class SightseeingModelTest(TestCase):
+class SightseeingModelTest(BaseModelTest):
     """
     Test case for the Sightseeing model.
     This test case includes the following tests:
@@ -346,13 +329,7 @@ class SightseeingModelTest(TestCase):
         """
         self.country = Country.objects.create(name="TestCountry")
         self.city = City.objects.create(name="TestCity", country=self.country)
-        self.sightseeing = Sightseeing.objects.create(
-            name="TestSightseeing",
-            city=self.city,
-            cost=100.0,
-            description="TestDescription",
-            rating=4.5,
-        )
+        self.sightseeing = self.create_n_sightseeings(1, [self.city])[0]
 
     def test_sightseeing_creation(self):
         """
@@ -393,7 +370,7 @@ class SightseeingModelTest(TestCase):
         self.assertEqual(self.sightseeing.country, self.country)
 
 
-class HotelModelTest(TestCase):
+class HotelModelTest(BaseModelTest):
     """
     Tests for the Hotel model.
     This test case includes the following tests:
@@ -479,7 +456,7 @@ class HotelModelTest(TestCase):
         self.assertEqual(self.hotel.country, self.country)
 
 
-class RoomModelTest(TestCase):
+class RoomModelTest(BaseModelTest):
     """
     Unit tests for the Room model.
     Tests included:
@@ -558,7 +535,7 @@ class RoomModelTest(TestCase):
         self.assertEqual(self.room.cost_per_day, 100.0)
 
 
-class AirportModelTest(TestCase):
+class AirportModelTest(BaseModelTest):
     """
     Test suite for the Airport model and related entities.
     Classes:
@@ -666,7 +643,7 @@ class AirportModelTest(TestCase):
         self.assertEqual(str(self.airport1), "Airport1")
 
 
-class FlightModelTest(TestCase):
+class FlightModelTest(BaseModelTest):
     """
     Unit tests for the Flight model.
     Classes:
@@ -884,7 +861,7 @@ class PlanModelTests(BaseModelTest):
         )
 
 
-class FlightPlanModelTest(TestCase):
+class FlightPlanModelTest(BaseModelTest):
     """
     Test suite for the FlightPlan model.
     This test case includes the following tests:
@@ -980,7 +957,7 @@ class FlightPlanModelTest(TestCase):
         self.assertIn(self.country2, countries)
 
 
-class SightseeingPlanModelTest(TestCase):
+class SightseeingPlanModelTest(BaseModelTest):
     """
     Unit tests for the SightseeingPlan model.
     This test case ensures that the SightseeingPlan model is correctly created and
