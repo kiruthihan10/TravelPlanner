@@ -13,8 +13,8 @@ Models:
     SightseeingPlan: Represents a relationship between a sightseeing spot and a plan with an order.
 """
 
-from django.db import models
 from typing import Set
+from django.db import models
 
 
 class Country(models.Model):
