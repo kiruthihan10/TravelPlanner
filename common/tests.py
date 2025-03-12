@@ -29,7 +29,7 @@ the correctness of model attributes, relationships, and methods.
 from datetime import date, datetime, timedelta
 import random
 import string
-from typing import List, Union
+from typing import List
 from django.test import TestCase
 
 from .models import (
@@ -54,13 +54,23 @@ class BaseModelTest(TestCase):
     def generate_random_string(self, length=10):
         """
         Generate a random string of specified length.
+        Args:
+            length (int): The length of the random string to generate. Default is 10.
+        Returns:
+            str: A random string consisting of ASCII letters.
         """
 
         return "".join(random.choices(string.ascii_letters, k=length))
 
     def create_n_countries(self, n) -> List[Country]:
         """
-        Create n Country instances.
+        Creates and returns a list of `n` Country objects with random names.
+
+        Args:
+            n (int): The number of Country objects to create.
+
+        Returns:
+            List[Country]: A list of created Country objects.
         """
         countries = []
         for _ in range(n):
@@ -71,6 +81,16 @@ class BaseModelTest(TestCase):
         return countries
 
     def create_n_cities(self, n: int, countries: List[Country]) -> List[City]:
+        """
+        Create a specified number of City instances and associate them with given countries.
+
+        Args:
+            n (int): The number of City instances to create.
+            countries (List[Country]): A list of Country instances to associate with the cities.
+
+        Returns:
+            List[City]: A list of created City instances.
+        """
         cities = []
         for i in range(n):
             city = City.objects.create(
@@ -81,6 +101,16 @@ class BaseModelTest(TestCase):
         return cities
 
     def create_n_sightseeings(self, n: int, cities: List[City]) -> List[Sightseeing]:
+        """
+        Creates a specified number of Sightseeing objects and associates them with the given cities.
+
+        Args:
+            n (int): The number of Sightseeing objects to create.
+            cities (List[City]): A list of City objects to associate with the Sightseeing objects.
+
+        Returns:
+            List[Sightseeing]: A list of created Sightseeing objects.
+        """
         sightseeings = []
         for i in range(n):
             sightseeing = Sightseeing.objects.create(
@@ -94,6 +124,16 @@ class BaseModelTest(TestCase):
         return sightseeings
 
     def create_n_hotels(self, n: int, cities: List[City]) -> List[Hotel]:
+        """
+        Creates a specified number of Hotel instances and associates them with the given cities.
+
+        Args:
+            n (int): The number of Hotel instances to create.
+            cities (List[City]): A list of City instances to associate with the hotels.
+
+        Returns:
+            List[Hotel]: A list of created Hotel instances.
+        """
         hotels = []
         for i in range(n):
             hotel = Hotel.objects.create(
@@ -105,6 +145,16 @@ class BaseModelTest(TestCase):
         return hotels
 
     def create_n_rooms(self, n: int, hotels: List[Hotel]) -> List[Room]:
+        """
+        Create a specified number of rooms and assign them to the given hotels.
+
+        Args:
+            n (int): The number of rooms to create.
+            hotels (List[Hotel]): A list of Hotel objects to which the rooms will be assigned.
+
+        Returns:
+            List[Room]: A list of created Room objects.
+        """
         rooms = []
         for i in range(n):
             room = Room.objects.create(
@@ -118,6 +168,16 @@ class BaseModelTest(TestCase):
         return rooms
 
     def create_n_airports(self, n: int, countries: List[Country]) -> List[Airport]:
+        """
+        Creates a specified number of Airport instances and associates them with the given countries.
+
+        Args:
+            n (int): The number of Airport instances to create.
+            countries (List[Country]): A list of Country instances to associate with the airports.
+
+        Returns:
+            List[Airport]: A list of created Airport instances.
+        """
         airports = []
         for i in range(n):
             airport = Airport.objects.create(
@@ -128,6 +188,16 @@ class BaseModelTest(TestCase):
         return airports
 
     def create_n_flights(self, n: int, airports: List[Airport]) -> List[Flight]:
+        """
+        Creates a specified number of Flight instances with random attributes.
+
+        Args:
+            n (int): The number of Flight instances to create.
+            airports (List[Airport]): A list of Airport instances to use for departure and arrival.
+
+        Returns:
+            List[Flight]: A list of created Flight instances.
+        """
         flights = []
         for i in range(n):
             flight = Flight.objects.create(
@@ -143,6 +213,15 @@ class BaseModelTest(TestCase):
         return flights
 
     def create_n_plans(self, n: int) -> List[Plan]:
+        """
+        Create and return a list of 'n' Plan objects.
+
+        Args:
+            n (int): The number of Plan objects to create.
+
+        Returns:
+            List[Plan]: A list containing the created Plan objects.
+        """
         plans = []
         for _ in range(n):
             plan = Plan.objects.create(name=f"Plan_{self.generate_random_string()}")
@@ -155,6 +234,17 @@ class BaseModelTest(TestCase):
         flights: List[Flight],
         plans: List[Plan],
     ) -> List[FlightPlan]:
+        """
+        Creates a specified number of flight plans by associating flights and plans.
+
+        Args:
+            n (int): The number of flight plans to create.
+            flights (List[Flight]): A list of Flight objects to be used in the flight plans.
+            plans (List[Plan]): A list of Plan objects to be used in the flight plans.
+
+        Returns:
+            List[FlightPlan]: A list of created FlightPlan objects.
+        """
         flight_plans = []
         for i in range(n):
             flight_plan = FlightPlan.objects.create(
@@ -171,6 +261,17 @@ class BaseModelTest(TestCase):
         sightseeings: List[Sightseeing],
         plans: List[Plan],
     ) -> List[SightseeingPlan]:
+        """
+        Create a specified number of sightseeing plans.
+
+        Args:
+            n (int): The number of sightseeing plans to create.
+            sightseeings (List[Sightseeing]): A list of sightseeing objects to be used in the plans.
+            plans (List[Plan]): A list of plan objects to be used in the sightseeing plans.
+
+        Returns:
+            List[SightseeingPlan]: A list of created SightseeingPlan objects.
+        """
         sightseeing_plans = []
         for i in range(n):
             sightseeing_plan = SightseeingPlan.objects.create(
@@ -734,17 +835,11 @@ class PlanModelTests(BaseModelTest):
         """
 
         self.countries = self.create_n_countries(2)
-        self.cities = self.create_n_cities(2, self.countries)
-        self.sightseeings = self.create_n_sightseeings(2, self.cities)
-        self.hotels = self.create_n_hotels(2, self.cities)
-        self.rooms = self.create_n_rooms(2, self.hotels)
-        self.airports = self.create_n_airports(2, self.countries)
-        self.flights = self.create_n_flights(2, self.airports)
+        cities = self.create_n_cities(2, self.countries)
+        self.sightseeings = self.create_n_sightseeings(2, cities)
+        self.rooms = self.create_n_rooms(2, self.create_n_hotels(2, cities))
+        [self.flight1, self.flight2] = self.create_n_flights(2, self.create_n_airports(2, self.countries))
         self.plan = self.create_n_plans(1)[0]
-
-        # Create flights
-        self.flight1 = self.flights[0]
-        self.flight2 = self.flights[1]
 
         self.create_n_flight_plans(2, [self.flight1, self.flight2], [self.plan])
         self.create_n_sightseeing_plans(2, self.sightseeings, [self.plan])
