@@ -603,63 +603,72 @@ class PlanModelTests(TestCase):
             - Two flight plans, each associated with a flight and the plan
             - Two sightseeing plans, each associated with a sightseeing spot and the plan
         """
-        # Create countries
-        self.country1 = Country.objects.create(name="Country1")
-        self.country2 = Country.objects.create(name="Country2")
 
-        # Create cities
-        self.city1 = City.objects.create(name="City1", country=self.country1)
-        self.city2 = City.objects.create(name="City2", country=self.country2)
+        self.countries = [
+            Country.objects.create(name="Country1"),
+            Country.objects.create(name="Country2"),
+        ]
 
-        # Create sightseeing spots
-        self.sightseeing1 = Sightseeing.objects.create(
-            name="Sightseeing1",
-            city=self.city1,
-            cost=100.0,
-            description="Description1",
-            rating=4.5,
-        )
-        self.sightseeing2 = Sightseeing.objects.create(
-            name="Sightseeing2",
-            city=self.city2,
-            cost=150.0,
-            description="Description2",
-            rating=4.0,
-        )
+        self.cities = [
+            City.objects.create(name="City1", country=self.countries[0]),
+            City.objects.create(name="City2", country=self.countries[1]),
+        ]
 
-        # Create rooms
-        self.room1 = Room.objects.create(
-            hotel=Hotel.objects.create(name="Hotel1", city=self.city1, rating=4.0),
-            room_type="Single",
-            from_date=date(2023, 1, 1),
-            to_date=date(2023, 1, 5),
-            cost=500.0,
-        )
-        self.room2 = Room.objects.create(
-            hotel=Hotel.objects.create(name="Hotel2", city=self.city2, rating=3.5),
-            room_type="Double",
-            from_date=date(2023, 1, 6),
-            to_date=date(2023, 1, 10),
-            cost=800.0,
-        )
+        self.sightseeings = [
+            Sightseeing.objects.create(
+                name="Sightseeing1",
+                city=self.cities[0],
+                cost=100.0,
+                description="Description1",
+                rating=4.5,
+            ),
+            Sightseeing.objects.create(
+                name="Sightseeing2",
+                city=self.cities[1],
+                cost=150.0,
+                description="Description2",
+                rating=4.0,
+            ),
+        ]
 
-        # Create airports
-        airport1 = Airport.objects.create(name="Airport1", country=self.country1)
-        airport2 = Airport.objects.create(name="Airport2", country=self.country2)
+        self.rooms = [
+            Room.objects.create(
+                hotel=Hotel.objects.create(
+                    name="Hotel1", city=self.cities[0], rating=4.0
+                ),
+                room_type="Single",
+                from_date=date(2023, 1, 1),
+                to_date=date(2023, 1, 5),
+                cost=500.0,
+            ),
+            Room.objects.create(
+                hotel=Hotel.objects.create(
+                    name="Hotel2", city=self.cities[1], rating=3.5
+                ),
+                room_type="Double",
+                from_date=date(2023, 1, 6),
+                to_date=date(2023, 1, 10),
+                cost=800.0,
+            ),
+        ]
 
         # Create flights
         self.flight1 = Flight.objects.create(
             name="Flight1",
-            departure=airport1,
-            arrival=airport2,
+            departure=Airport.objects.create(
+                name="Airport1", country=self.countries[0]
+            ),
+            arrival=Airport.objects.create(name="Airport2", country=self.countries[1]),
             cost=300.0,
             departure_date_time=datetime(2023, 1, 1, 10, 0),
             arrival_date_time=datetime(2023, 1, 1, 14, 0),
         )
         self.flight2 = Flight.objects.create(
             name="Flight2",
-            departure=airport2,
-            arrival=airport1,
+            departure=Airport.objects.create(
+                name="Airport3", country=self.countries[1]
+            ),
+            arrival=Airport.objects.create(name="Airport4", country=self.countries[1]),
             cost=350.0,
             departure_date_time=datetime(2023, 1, 10, 16, 0),
             arrival_date_time=datetime(2023, 1, 10, 20, 0),
@@ -667,7 +676,7 @@ class PlanModelTests(TestCase):
 
         # Create plan
         self.plan = Plan.objects.create(name="Plan1", version=1)
-        self.plan.rooms.add(self.room1, self.room2)
+        self.plan.rooms.add(self.rooms[0], self.rooms[1])
         self.plan = Plan.objects.get(pk=self.plan.pk)
 
         # Create flight plans
@@ -676,10 +685,10 @@ class PlanModelTests(TestCase):
 
         # Create sightseeing plans
         SightseeingPlan.objects.create(
-            sightseeing=self.sightseeing1, plan=self.plan, order=1
+            sightseeing=self.sightseeings[0], plan=self.plan, order=1
         )
         SightseeingPlan.objects.create(
-            sightseeing=self.sightseeing2, plan=self.plan, order=2
+            sightseeing=self.sightseeings[1], plan=self.plan, order=2
         )
 
     def test_countries(self):
@@ -694,8 +703,8 @@ class PlanModelTests(TestCase):
             self.assertIn(self.country2, countries): Verifies that country2 is in the countries list.
         """
         countries = self.plan.countries
-        self.assertIn(self.country1, countries)
-        self.assertIn(self.country2, countries)
+        self.assertIn(self.countries[0], countries)
+        self.assertIn(self.countries[1], countries)
 
     def test_planes(self):
         """
@@ -716,8 +725,8 @@ class PlanModelTests(TestCase):
         predefined sightseeing1 and sightseeing2 objects.
         """
         sightseeings = self.plan.sightseeings
-        self.assertIn(self.sightseeing1, sightseeings)
-        self.assertIn(self.sightseeing2, sightseeings)
+        self.assertIn(self.sightseeings[0], sightseeings)
+        self.assertIn(self.sightseeings[1], sightseeings)
 
     def test_cost(self):
         """
@@ -733,10 +742,10 @@ class PlanModelTests(TestCase):
         """
         total_cost = self.plan.cost
         expected_cost = (
-            self.room1.cost
-            + self.room2.cost
-            + self.sightseeing1.cost
-            + self.sightseeing2.cost
+            self.rooms[0].cost
+            + self.rooms[1].cost
+            + self.sightseeings[0].cost
+            + self.sightseeings[1].cost
             + self.flight1.cost
             + self.flight2.cost
         )
@@ -793,20 +802,18 @@ class FlightPlanModelTest(TestCase):
         """
         self.country1 = Country.objects.create(name="Country1")
         self.country2 = Country.objects.create(name="Country2")
-        self.airport1 = Airport.objects.create(name="Airport1", country=self.country1)
-        self.airport2 = Airport.objects.create(name="Airport2", country=self.country2)
         self.flight1 = Flight.objects.create(
             name="Flight1",
-            departure=self.airport1,
-            arrival=self.airport2,
+            departure=Airport.objects.create(name="Airport1", country=self.country1),
+            arrival=Airport.objects.create(name="Airport2", country=self.country1),
             cost=100.0,
             departure_date_time="2023-01-01T10:00:00Z",
             arrival_date_time="2023-01-01T14:00:00Z",
         )
         self.flight2 = Flight.objects.create(
             name="Flight2",
-            departure=self.airport2,
-            arrival=self.airport1,
+            departure=Airport.objects.create(name="Airport3", country=self.country1),
+            arrival=Airport.objects.create(name="Airport4", country=self.country1),
             cost=150.0,
             departure_date_time="2023-01-10T16:00:00Z",
             arrival_date_time="2023-01-10T20:00:00Z",
