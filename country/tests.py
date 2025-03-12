@@ -56,14 +56,7 @@ class CountryModelTest(BaseModelTest):
             order=1,
         )
         FlightPlan.objects.create(
-            flight=Flight.objects.create(
-                name="Flight2",
-                departure=airport3,
-                arrival=airport2,
-                cost=150.0,
-                departure_date_time="2023-01-02T10:00:00Z",
-                arrival_date_time="2023-01-02T12:00:00Z",
-            ),
+            flight=self.create_n_flights(1, [airport3, airport2])[0],
             plan=self.plan2,
             order=1,
         )

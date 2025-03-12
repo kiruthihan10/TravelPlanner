@@ -58,14 +58,7 @@ class AirportModelTest(BaseModelTest):
         # Create flight plans
         FlightPlan.objects.create(flight=self.flight1, plan=self.plan1, order=1)
         FlightPlan.objects.create(
-            flight=Flight.objects.create(
-                name="Flight2",
-                departure=self.airport2,
-                arrival=self.airport1,
-                cost=150.0,
-                departure_date_time="2023-01-02T10:00:00Z",
-                arrival_date_time="2023-01-02T12:00:00Z",
-            ),
+            flight=self.create_n_flights(1, [self.airport2, self.airport1])[0],
             plan=self.plan2,
             order=1,
         )
