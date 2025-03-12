@@ -26,6 +26,7 @@ the correctness of model attributes, relationships, and methods.
     SightseeingPlanModelTest: Unit tests for the SightseeingPlan model.
 """
 
+from datetime import date, datetime, timedelta
 from django.test import TestCase
 
 from .models import (
@@ -40,7 +41,6 @@ from .models import (
     FlightPlan,
     SightseeingPlan,
 )
-from datetime import date, datetime, timedelta
 
 
 class CountryModelTest(TestCase):
@@ -432,25 +432,24 @@ class AirportModelTest(TestCase):
             departure_date_time="2023-01-01T10:00:00Z",
             arrival_date_time="2023-01-01T12:00:00Z",
         )
-        self.flight2 = Flight.objects.create(
-            name="Flight2",
-            departure=self.airport2,
-            arrival=self.airport1,
-            cost=150.0,
-            departure_date_time="2023-01-02T10:00:00Z",
-            arrival_date_time="2023-01-02T12:00:00Z",
-        )
 
         # Create plans
         self.plan1 = Plan.objects.create(name="Plan1", version=1)
         self.plan2 = Plan.objects.create(name="Plan2", version=1)
 
         # Create flight plans
-        self.flight_plan1 = FlightPlan.objects.create(
-            flight=self.flight1, plan=self.plan1, order=1
-        )
-        self.flight_plan2 = FlightPlan.objects.create(
-            flight=self.flight2, plan=self.plan2, order=1
+        FlightPlan.objects.create(flight=self.flight1, plan=self.plan1, order=1)
+        FlightPlan.objects.create(
+            flight=Flight.objects.create(
+                name="Flight2",
+                departure=self.airport2,
+                arrival=self.airport1,
+                cost=150.0,
+                departure_date_time="2023-01-02T10:00:00Z",
+                arrival_date_time="2023-01-02T12:00:00Z",
+            ),
+            plan=self.plan2,
+            order=1,
         )
 
     def test_plans_for_airport(self):
@@ -524,19 +523,16 @@ class FlightModelTest(TestCase):
         - Two plans (`plan1` and `plan2`).
         - Two flight plans (`flightPlan1` and `flightPlan2`), each associating the flight with one of the plans.
         """
-        # Create countries
-        self.country1 = Country.objects.create(name="Country1")
-        self.country2 = Country.objects.create(name="Country2")
-
-        # Create airports
-        self.airport1 = Airport.objects.create(name="Airport1", country=self.country1)
-        self.airport2 = Airport.objects.create(name="Airport2", country=self.country2)
 
         # Create flights
         self.flight = Flight.objects.create(
             name="Flight1",
-            departure=self.airport1,
-            arrival=self.airport2,
+            departure=Airport.objects.create(
+                name="Airport1", country=Country.objects.create(name="Country1")
+            ),
+            arrival=Airport.objects.create(
+                name="Airport2", country=Country.objects.create(name="Country2")
+            ),
             cost=100.0,
             departure_date_time=datetime(2023, 1, 1, 10, 0),
             arrival_date_time=datetime(2023, 1, 1, 12, 0),
@@ -546,12 +542,8 @@ class FlightModelTest(TestCase):
         self.plan1 = Plan.objects.create(name="Plan1", version=1)
         self.plan2 = Plan.objects.create(name="Plan2", version=1)
 
-        self.flightPlan1 = FlightPlan.objects.create(
-            flight=self.flight, plan=self.plan1, order=1
-        )
-        self.flightPlan2 = FlightPlan.objects.create(
-            flight=self.flight, plan=self.plan2, order=1
-        )
+        FlightPlan.objects.create(flight=self.flight, plan=self.plan1, order=1)
+        FlightPlan.objects.create(flight=self.flight, plan=self.plan2, order=1)
 
     def test_plans(self):
         """
@@ -635,20 +627,16 @@ class PlanModelTests(TestCase):
             rating=4.0,
         )
 
-        # Create hotels
-        self.hotel1 = Hotel.objects.create(name="Hotel1", city=self.city1, rating=4.0)
-        self.hotel2 = Hotel.objects.create(name="Hotel2", city=self.city2, rating=3.5)
-
         # Create rooms
         self.room1 = Room.objects.create(
-            hotel=self.hotel1,
+            hotel=Hotel.objects.create(name="Hotel1", city=self.city1, rating=4.0),
             room_type="Single",
             from_date=date(2023, 1, 1),
             to_date=date(2023, 1, 5),
             cost=500.0,
         )
         self.room2 = Room.objects.create(
-            hotel=self.hotel2,
+            hotel=Hotel.objects.create(name="Hotel2", city=self.city2, rating=3.5),
             room_type="Double",
             from_date=date(2023, 1, 6),
             to_date=date(2023, 1, 10),
@@ -656,22 +644,22 @@ class PlanModelTests(TestCase):
         )
 
         # Create airports
-        self.airport1 = Airport.objects.create(name="Airport1", country=self.country1)
-        self.airport2 = Airport.objects.create(name="Airport2", country=self.country2)
+        airport1 = Airport.objects.create(name="Airport1", country=self.country1)
+        airport2 = Airport.objects.create(name="Airport2", country=self.country2)
 
         # Create flights
         self.flight1 = Flight.objects.create(
             name="Flight1",
-            departure=self.airport1,
-            arrival=self.airport2,
+            departure=airport1,
+            arrival=airport2,
             cost=300.0,
             departure_date_time=datetime(2023, 1, 1, 10, 0),
             arrival_date_time=datetime(2023, 1, 1, 14, 0),
         )
         self.flight2 = Flight.objects.create(
             name="Flight2",
-            departure=self.airport2,
-            arrival=self.airport1,
+            departure=airport2,
+            arrival=airport1,
             cost=350.0,
             departure_date_time=datetime(2023, 1, 10, 16, 0),
             arrival_date_time=datetime(2023, 1, 10, 20, 0),
@@ -683,18 +671,14 @@ class PlanModelTests(TestCase):
         self.plan = Plan.objects.get(pk=self.plan.pk)
 
         # Create flight plans
-        self.flight_plan1 = FlightPlan.objects.create(
-            flight=self.flight1, plan=self.plan, order=1
-        )
-        self.flight_plan2 = FlightPlan.objects.create(
-            flight=self.flight2, plan=self.plan, order=2
-        )
+        FlightPlan.objects.create(flight=self.flight1, plan=self.plan, order=1)
+        FlightPlan.objects.create(flight=self.flight2, plan=self.plan, order=2)
 
         # Create sightseeing plans
-        self.sightseeing_plan1 = SightseeingPlan.objects.create(
+        SightseeingPlan.objects.create(
             sightseeing=self.sightseeing1, plan=self.plan, order=1
         )
-        self.sightseeing_plan2 = SightseeingPlan.objects.create(
+        SightseeingPlan.objects.create(
             sightseeing=self.sightseeing2, plan=self.plan, order=2
         )
 
