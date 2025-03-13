@@ -4,9 +4,9 @@ from django.http import HttpResponse
 from django.template import loader
 
 from common.models import Country
-from common.pagination import pagination_handle
 from django.core.paginator import Paginator
 
+from common.tables import pagination_handle
 from country.tables import CountryTable
 
 
