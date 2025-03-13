@@ -44,6 +44,16 @@ class Country(models.Model):
             models.Q(flightplan__flight__departure__country=self)
             | models.Q(flightplan__flight__arrival__country=self)
         ).distinct()
+    
+    @property
+    def cities(self):
+        """
+        Retrieves all City objects associated with the current country.
+
+        Returns:
+            QuerySet: A QuerySet containing all City objects that are part of the current country.
+        """
+        return City.objects.filter(country=self)
 
 
 class City(models.Model):
