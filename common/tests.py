@@ -17,11 +17,18 @@ Methods:
 """
 
 from datetime import date, datetime, timedelta
-
 import random
 import string
 from typing import List
+import unittest
+
 from django.test import TestCase
+from django.http import HttpRequest
+from django.test import RequestFactory
+from django.core.paginator import Paginator
+from django.template import Template
+
+from .components.tables import ModelTable, pagination_handle
 
 from .models import (
     Country,
@@ -36,6 +43,10 @@ from .models import (
     SightseeingPlan,
 )
 
+class MockModel:
+    def __init__(self, **kwargs):
+        for key, value in kwargs.items():
+            setattr(self, key, value)
 
 class BaseModelTest(TestCase):
     """
@@ -272,3 +283,167 @@ class BaseModelTest(TestCase):
             )
             sightseeing_plans.append(sightseeing_plan)
         return sightseeing_plans
+
+class TestPaginationHandleTest(unittest.TestCase):
+    """
+    Unit tests for the pagination_handle function.
+    TestPaginationHandleTest is a test case class that contains the following tests:
+    - test_default_values: Tests that the default pagination size is 10 and the default page number is 1.
+    - test_custom_size_and_page: Tests that custom size and page number values are correctly parsed from the request.
+    - test_invalid_size: Tests that an invalid size value defaults to 10.
+    - test_invalid_page: Tests that an invalid page number value defaults to 1.
+    - test_partial_parameters: Tests that partial parameters (only size or only page) are handled correctly.
+    """
+
+    def test_default_values(self):
+        """
+        Test the default values for pagination.
+
+        This test verifies that when an HttpRequest object is passed to the
+        pagination_handle function without any query parameters, the default
+        values for size and page_number are correctly set to 10 and 1,
+        respectively.
+        """
+        request = HttpRequest()
+        size, page_number = pagination_handle(request)
+        self.assertEqual(size, 10)
+        self.assertEqual(page_number, 1)
+
+    def test_custom_size_and_page(self):
+        """
+        Test the pagination_handle function with custom size and page number.
+
+        This test simulates an HTTP GET request with 'size' set to '20' and 'page' set to '2'.
+        It verifies that the pagination_handle function correctly parses these values and
+        returns the expected size and page number.
+
+        Assertions:
+            - The size returned by pagination_handle should be 20.
+            - The page number returned by pagination_handle should be 2.
+        """
+        request = HttpRequest()
+        request.GET['size'] = '20'
+        request.GET['page'] = '2'
+        size, page_number = pagination_handle(request)
+        self.assertEqual(size, 20)
+        self.assertEqual(page_number, 2)
+
+    def test_invalid_size(self):
+        """
+        Test case for pagination_handle function to handle invalid size parameter.
+
+        This test simulates an HTTP GET request with an invalid 'size' parameter
+        and verifies that the pagination_handle function returns the default size
+        of 10 and the default page number of 1.
+
+        Assertions:
+            - The size should be set to the default value of 10.
+            - The page number should be set to the default value of 1.
+        """
+        request = HttpRequest()
+        request.GET['size'] = 'invalid'
+        size, page_number = pagination_handle(request)
+        self.assertEqual(size, 10)
+        self.assertEqual(page_number, 1)
+
+    def test_invalid_page(self):
+        """
+        Test case for handling an invalid page number in the pagination.
+
+        This test simulates a request with an invalid page number and verifies
+        that the pagination_handle function returns the default size and page number.
+
+        Steps:
+        1. Create an HttpRequest object.
+        2. Set the 'page' parameter in the GET request to 'invalid'.
+        3. Call the pagination_handle function with the request.
+        4. Assert that the returned size is 10.
+        5. Assert that the returned page number is 1.
+        """
+        request = HttpRequest()
+        request.GET['page'] = 'invalid'
+        size, page_number = pagination_handle(request)
+        self.assertEqual(size, 10)
+        self.assertEqual(page_number, 1)
+
+    def test_partial_parameters(self):
+        """
+        Tests the pagination_handle function with partial parameters.
+        This test verifies that the pagination_handle function correctly handles
+        requests with only the 'size' parameter and only the 'page' parameter.
+        Test cases:
+        1. When the 'size' parameter is provided, the function should return the
+            specified size and the default page number (1).
+        2. When the 'page' parameter is provided, the function should return the
+            default size (10) and the specified page number.
+        Assertions:
+        - The size should be equal to the provided 'size' parameter.
+        - The page number should be equal to the default page number (1) when only
+          the 'size' parameter is provided.
+        - The size should be equal to the default size (10) when only the 'page'
+          parameter is provided.
+        - The page number should be equal to the provided 'page' parameter.
+        """
+        request = HttpRequest()
+        request.GET['size'] = '15'
+        size, page_number = pagination_handle(request)
+        self.assertEqual(size, 15)
+        self.assertEqual(page_number, 1)
+
+        request = HttpRequest()
+        request.GET['page'] = '3'
+        size, page_number = pagination_handle(request)
+        self.assertEqual(size, 10)
+        self.assertEqual(page_number, 3)
+
+class ModelTableTest(BaseModelTest):
+
+    def setUp(self):
+        self.instances = self.create_n_countries(20)
+        self.paginator = Paginator(self.instances, 10)
+        self.page = self.paginator.page(1)
+        self.columns = ["name"]
+        self.table = ModelTable(self.page, self.columns)
+
+    def test_default_row_func(self):
+        instance = self.instances[0]
+        row = self.table.default_row_func(instance)
+        self.assertEqual(row, [self.instances[0].name])
+
+    def test_rows(self):
+        rows = list(self.table.rows)
+        self.assertEqual(len(rows), 10)
+        self.assertEqual(rows[0], [self.instances[0].name])
+
+    def test_columns(self):
+        self.assertEqual(self.table.columns, ["Name"])
+
+    def test_has_previous(self):
+        self.assertFalse(self.table.has_previous)
+        page = self.paginator.page(2)
+        table = ModelTable(page, self.columns)
+        self.assertTrue(table.has_previous)
+
+    def test_has_next(self):
+        self.assertTrue(self.table.has_next)
+        page = self.paginator.page(2)
+        table = ModelTable(page, self.columns)
+        self.assertFalse(table.has_next)
+
+    def test_previous_page_number(self):
+        page = self.paginator.page(2)
+        table = ModelTable(page, self.columns)
+        self.assertEqual(table.previous_page_number, 1)
+
+    def test_next_page_number(self):
+        self.assertEqual(self.table.next_page_number, 2)
+
+    def test_page_number(self):
+        self.assertEqual(self.table.page_number, 1)
+
+    def test_page_size(self):
+        self.assertEqual(self.table.page_size, 10)
+
+    def test_render(self):
+        rendered = self.table.render()
+        self.assertIn("Name", rendered)
