@@ -79,5 +79,5 @@ def create_country(request):
             country_form.save()
             return redirect(f"/countries/")
     else:
-        raise BadRequest("Invalid request method.")
+        return HttpResponse(status=405)
     return HttpResponse(template.render({"form": country_form.render_form()}, request))

@@ -176,6 +176,20 @@ class CountryTableTest(BaseModelTest):
             self.assertIn(country.name, rendered_table)
             self.assertIn(str(country.cities.count()), rendered_table)
 
+    def test_incorrect_type(self):
+        """
+        Test that the CountryTable raises a ValueError when an incorrect type is passed.
+
+        This test verifies that the CountryTable raises a ValueError when an incorrect type is passed
+        to the constructor.
+
+        Assertions:
+            - The CountryTable constructor should raise a ValueError when an incorrect type is passed.
+        """
+        paginator = Paginator([1, 2, 3], 1)
+        with self.assertRaises(ValueError):
+            CountryTable(paginator.page(1))
+
 
 class CountryListViewTest(BaseModelTest):
 
@@ -206,6 +220,10 @@ class CountryCreateViewTest(BaseModelTest):
         country = Country.objects.first()
         if country:
             self.assertEqual(country.name, "Test Country")
+
+    def test_incorrect_method(self):
+        response = self.client.put("/country/add")
+        self.assertEqual(response.status_code, 405)
 
 
 class CityModelTest(BaseModelTest):

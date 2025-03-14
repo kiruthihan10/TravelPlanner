@@ -43,11 +43,6 @@ from .models import (
     SightseeingPlan,
 )
 
-class MockModel:
-    def __init__(self, **kwargs):
-        for key, value in kwargs.items():
-            setattr(self, key, value)
-
 class BaseModelTest(TestCase):
     """
     Base Test Case for TravelPlanner application models.
@@ -410,6 +405,13 @@ class ModelTableTest(BaseModelTest):
         row = self.table.default_row_func(instance)
         self.assertEqual(row, [self.instances[0].name])
 
+    def test_custom_row_func(self):
+        def custom_row_func(instance):
+            return [instance.name.upper()]
+        table = ModelTable(self.page, self.columns, custom_row_func)
+        row = table.row_func(self.instances[0])
+        self.assertEqual(row, [self.instances[0].name.upper()])
+
     def test_rows(self):
         rows = list(self.table.rows)
         self.assertEqual(len(rows), 10)
@@ -447,3 +449,10 @@ class ModelTableTest(BaseModelTest):
     def test_render(self):
         rendered = self.table.render()
         self.assertIn("Name", rendered)
+
+    def test_row_column_mismatch(self):
+        def custom_row_func(instance):
+            return [instance.name, instance.name]
+        table = ModelTable(self.page, self.columns, custom_row_func)
+        with self.assertRaises(ValueError):
+            list(table.rows)
