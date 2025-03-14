@@ -2,9 +2,7 @@
 <div class="block">
   <h1 class="is-size-1 has-text-centered">Add New Country</h1>
   <form action="" method="post">
-    {% with form=form %}
-      {% include 'form.html' %}
-    {% endwith %}
+    {{ form }}
     <div class="block">
       <div class="columns">
         <div class="column is-half is-offset-one-quarter">

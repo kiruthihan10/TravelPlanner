@@ -80,4 +80,4 @@ def create_country(request):
             return redirect(f"/countries/")
     else:
         raise BadRequest("Invalid request method.")
-    return HttpResponse(template.render({"form": country_form}, request))
+    return HttpResponse(template.render({"form": country_form.render_form()}, request))
