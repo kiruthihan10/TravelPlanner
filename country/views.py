@@ -1,13 +1,17 @@
 """ """
 
 from django.http import HttpResponse
+from django.shortcuts import redirect
 from django.template import loader
 
-from common.models import Country
 from django.core.paginator import Paginator
+from django.core.exceptions import BadRequest
 
 from common.components.tables import pagination_handle
-from country.tables import CountryTable
+from common.models import Country
+
+from .forms import CountryForm
+from .tables import CountryTable
 
 
 def country_list(request):
@@ -48,3 +52,32 @@ def country_list(request):
             request,
         )
     )
+
+
+def create_country(request):
+    """
+    Handles the request to create a new country.
+
+    Args:
+        request (HttpRequest): The HTTP request object containing the form data.
+
+    Returns:
+        HttpResponse: The HTTP response object with the rendered template.
+
+    Template:
+        create_country.html: The template used to render the country creation form.
+
+    Context:
+        form (CountryForm): The form object for creating a new country.
+    """
+    template = loader.get_template("create_country.html")
+    if request.method == "GET":
+        country_form = CountryForm()
+    elif request.method == "POST":
+        country_form = CountryForm(request.POST)
+        if country_form.is_valid():
+            country_form.save()
+            return redirect(f"/countries/")
+    else:
+        raise BadRequest("Invalid request method.")
+    return HttpResponse(template.render({"form": country_form}, request))
