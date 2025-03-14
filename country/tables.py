@@ -1,6 +1,6 @@
 from typing import List
 from common.models import Country
-from common.tables import ModelTable
+from common.components.tables import ModelTable
 from django.core.paginator import Page
 
 

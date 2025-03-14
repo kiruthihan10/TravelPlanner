@@ -1,37 +1,16 @@
 {% extends "base.html" %} {% block content %}
-<div class="block">
   <h1 class="is-size-1 has-text-centered">Countries Page</h1>
-  <form method="get">
-    <input
-      type="text"
-      name="search_text"
-      value="{{ request.GET.search_text }}"
-      class="input"
-    />
-    <div class="columns" style="padding-top: 20px">
-      <div class="column is-4 is-offset-4">
-        <button type="submit" class="button is-fullwidth is-info">
-          Search
-        </button>
-      </div>
-    </div>
-  </form>
-  <div class="columns">
-    <div class="column is-2 is-offset-10">
-      <a href="/countries/add">
-        <button
-          class="button is-fullwidth is-primary"
-          type="button"
-          value="Add Area"
-        >
-          Add Country
-        </button>
-      </a>
-    </div>
+  {% include "search.html" %}
+  <div class="column is-2 is-offset-10">
+    <a href="/countries/add">
+      <button
+        class="button is-fullwidth is-primary"
+        type="button"
+        value="Add Area"
+      >
+        Add Country
+      </button>
+    </a>
   </div>
-    {% with table=countries %}
-      {% include 'table.html' %}
-    {% endwith %}
-  
-</div>
+  {{countries}}
 {% endblock %}

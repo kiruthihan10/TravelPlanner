@@ -6,7 +6,7 @@ from django.template import loader
 from common.models import Country
 from django.core.paginator import Paginator
 
-from common.tables import pagination_handle
+from common.components.tables import pagination_handle
 from country.tables import CountryTable
 
 
@@ -43,7 +43,7 @@ def country_list(request):
     return HttpResponse(
         template.render(
             {
-                "countries": CountryTable(p.page(page_number)),
+                "countries": CountryTable(p.page(page_number)).render(),
             },
             request,
         )

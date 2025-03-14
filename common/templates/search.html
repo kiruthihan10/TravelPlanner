@@ -1,0 +1,13 @@
+<form method="get">
+  <input
+    type="text"
+    name="search_text"
+    value="{{ request.GET.search_text }}"
+    class="input"
+  />
+  <div class="columns" style="padding-top: 20px">
+    <div class="column is-4 is-offset-4">
+      <button type="submit" class="button is-fullwidth is-info">Search</button>
+    </div>
+  </div>
+</form>
