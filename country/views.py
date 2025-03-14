@@ -43,7 +43,6 @@ def country_list(request):
     return HttpResponse(
         template.render(
             {
-                "paginator": p,
                 "countries": CountryTable(p.page(page_number)),
             },
             request,
