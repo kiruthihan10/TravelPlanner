@@ -1,0 +1,37 @@
+<div class="block">
+    <table class="table is-fullwidth is-striped is-hoverable">
+        <thead>
+          <tr>
+            {% for column in table.columns %}
+                <td>{{ column }}</td>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+            {% for row in table.rows %}
+            <tr>
+                {% for item in row %}
+                    <td>{{ item }}</td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </tbody>
+      </table>
+      <nav class="pagination" role="navigation" aria-label="pagination">
+        {% if table.has_previous %}
+          <a class="pagination-previous" href="?page={{ table.previous_page_number }}&size={{ table.page_size }}">Previous</a>
+        {% endif %}
+      
+        <ul class="pagination-list">
+          {% for page_num in paginator.page_range %}
+            <li style="padding-right: 10px;">
+              <a href="?page={{ page_num }}&size={{ table.page_size }}"  {% if page_num == table.page_number %}class="has-text-success"{% endif %}>{{ page_num }}</a>
+            </li>
+          {% endfor %}
+        </ul>
+      
+        {% if table.has_next %}
+          <a class="pagination-next" href="?page={{ table.next_page_number }}&size={{ table.page_size }}">Next</a>
+        {% endif %}
+      </nav>
+</div>

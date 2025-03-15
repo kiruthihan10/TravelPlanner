@@ -1,0 +1,16 @@
+{% extends "base.html" %} {% block content %}
+  <h1 class="is-size-1 has-text-centered">Countries Page</h1>
+  {% include "search.html" %}
+  <div class="column is-2 is-offset-10">
+    <a href="/country/add">
+      <button
+        class="button is-fullwidth is-primary"
+        type="button"
+        value="Add Area"
+      >
+        Add Country
+      </button>
+    </a>
+  </div>
+  {{countries}}
+{% endblock %}
