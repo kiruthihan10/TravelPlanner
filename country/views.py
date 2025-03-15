@@ -1,11 +1,30 @@
-""" """
+"""
+Handles the request to list countries with optional search and pagination.
+
+Args:
+    request (HttpRequest): The HTTP request object containing GET parameters.
+
+Returns:
+    HttpResponse: The HTTP response object with the rendered template.
+
+GET Parameters:
+    search_text (str, optional): The text to search for in country names.
+    page (int, optional): The page number for pagination.
+    size (int, optional): The number of items per page for pagination.
+
+Template:
+    countries.html: The template used to render the list of countries.
+
+Context:
+    paginator (Paginator): The paginator object for handling pagination.
+    countries (Page): The current page of countries.
+"""
 
 from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.template import loader
 
 from django.core.paginator import Paginator
-from django.core.exceptions import BadRequest
 
 from common.components.tables import pagination_handle
 from common.models import Country
@@ -77,7 +96,7 @@ def create_country(request):
         country_form = CountryForm(request.POST)
         if country_form.is_valid():
             country_form.save()
-            return redirect(f"/countries/")
+            return redirect("/countries/")
     else:
         return HttpResponse(status=405)
     return HttpResponse(template.render({"form": country_form.render_form()}, request))

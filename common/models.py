@@ -44,7 +44,7 @@ class Country(models.Model):
             models.Q(flightplan__flight__departure__country=self)
             | models.Q(flightplan__flight__arrival__country=self)
         ).distinct()
-    
+
     @property
     def cities(self):
         """
@@ -470,6 +470,3 @@ class SightseeingPlan(models.Model):
 
         unique_together = ("sightseeing", "plan")
         ordering = ["order"]
-
-
-# Create your models here.

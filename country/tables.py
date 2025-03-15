@@ -1,7 +1,16 @@
-from typing import List
+"""
+A module for representing a table of Country instances.
+Classes:
+    CountryTable(ModelTable):
+
+"""
+
+from typing import List, Union
+
+from django.core.paginator import Page
+
 from common.models import Country
 from common.components.tables import ModelTable
-from django.core.paginator import Page
 
 
 class CountryTable(ModelTable):
@@ -19,10 +28,14 @@ class CountryTable(ModelTable):
             The row contains the country's name and the count of its cities.
     """
 
-    def __init__(self, countries: Page, columns: List[str] = ["name","number of cities"]):
+    def __init__(self, countries: Page, columns: Union[List[str], None] = None):
+        if columns is None:
+            columns = ["name", "number of cities"]
         super().__init__(countries, columns)
         if not all(isinstance(country, Country) for country in countries):
-            raise ValueError("All items in countries must be instances of Country model")
+            raise ValueError(
+                "All items in countries must be instances of Country model"
+            )
 
     def default_row_func(self, instance: Country) -> List:
         """

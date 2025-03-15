@@ -24,9 +24,7 @@ import unittest
 
 from django.test import TestCase
 from django.http import HttpRequest
-from django.test import RequestFactory
 from django.core.paginator import Paginator
-from django.template import Template
 
 from .components.tables import ModelTable, pagination_handle
 
@@ -42,6 +40,7 @@ from .models import (
     FlightPlan,
     SightseeingPlan,
 )
+
 
 class BaseModelTest(TestCase):
     """
@@ -279,6 +278,7 @@ class BaseModelTest(TestCase):
             sightseeing_plans.append(sightseeing_plan)
         return sightseeing_plans
 
+
 class TestPaginationHandleTest(unittest.TestCase):
     """
     Unit tests for the pagination_handle function.
@@ -317,8 +317,8 @@ class TestPaginationHandleTest(unittest.TestCase):
             - The page number returned by pagination_handle should be 2.
         """
         request = HttpRequest()
-        request.GET['size'] = '20'
-        request.GET['page'] = '2'
+        request.GET["size"] = "20"
+        request.GET["page"] = "2"
         size, page_number = pagination_handle(request)
         self.assertEqual(size, 20)
         self.assertEqual(page_number, 2)
@@ -336,7 +336,7 @@ class TestPaginationHandleTest(unittest.TestCase):
             - The page number should be set to the default value of 1.
         """
         request = HttpRequest()
-        request.GET['size'] = 'invalid'
+        request.GET["size"] = "invalid"
         size, page_number = pagination_handle(request)
         self.assertEqual(size, 10)
         self.assertEqual(page_number, 1)
@@ -356,7 +356,7 @@ class TestPaginationHandleTest(unittest.TestCase):
         5. Assert that the returned page number is 1.
         """
         request = HttpRequest()
-        request.GET['page'] = 'invalid'
+        request.GET["page"] = "invalid"
         size, page_number = pagination_handle(request)
         self.assertEqual(size, 10)
         self.assertEqual(page_number, 1)
@@ -380,20 +380,48 @@ class TestPaginationHandleTest(unittest.TestCase):
         - The page number should be equal to the provided 'page' parameter.
         """
         request = HttpRequest()
-        request.GET['size'] = '15'
+        request.GET["size"] = "15"
         size, page_number = pagination_handle(request)
         self.assertEqual(size, 15)
         self.assertEqual(page_number, 1)
 
         request = HttpRequest()
-        request.GET['page'] = '3'
+        request.GET["page"] = "3"
         size, page_number = pagination_handle(request)
         self.assertEqual(size, 10)
         self.assertEqual(page_number, 3)
 
+
 class ModelTableTest(BaseModelTest):
+    """
+    Unit tests for the ModelTable class.
+    Tests included:
+    - setUp: Initializes the test environment with sample data and a paginator.
+    - test_default_row_func: Verifies the default row function returns the correct data.
+    - test_custom_row_func: Checks that a custom row function can be used and returns the correct data.
+    - test_rows: Ensures the correct number of rows are returned and the data is accurate.
+    - test_columns: Validates that the table columns are set correctly.
+    - test_has_previous: Tests the has_previous property for pagination.
+    - test_has_next: Tests the has_next property for pagination.
+    - test_previous_page_number: Verifies the previous_page_number property.
+    - test_next_page_number: Verifies the next_page_number property.
+    - test_page_number: Checks the current page number.
+    - test_page_size: Ensures the page size is correct.
+    - test_render: Tests the render method to ensure the table is rendered correctly.
+    - test_row_column_mismatch: Ensures a ValueError is raised when there is a mismatch between row data and columns.
+    """
 
     def setUp(self):
+        """
+        Set up the test environment.
+
+        This method initializes the following:
+        - Creates 20 country instances using `create_n_countries`.
+        - Initializes a Paginator with the created instances, setting 10 instances per page.
+        - Retrieves the first page of the paginator.
+        - Defines the columns to be used in the table.
+        - Initializes a ModelTable with the first page and the specified columns.
+        """
         self.instances = self.create_n_countries(20)
         self.paginator = Paginator(self.instances, 10)
         self.page = self.paginator.page(1)
@@ -401,58 +429,172 @@ class ModelTableTest(BaseModelTest):
         self.table = ModelTable(self.page, self.columns)
 
     def test_default_row_func(self):
+        """
+        Test the default_row_func method of the table.
+
+        This test checks that the default_row_func method correctly generates
+        a row for the given instance. It verifies that the generated row
+        matches the expected output, which is a list containing the name
+        of the instance.
+        """
         instance = self.instances[0]
         row = self.table.default_row_func(instance)
         self.assertEqual(row, [self.instances[0].name])
 
     def test_custom_row_func(self):
+        """
+        Test the custom_row_func method of the ModelTable class.
+        This test verifies that the custom_row_func correctly transforms the
+        instance's name to uppercase and returns it in a list.
+        Steps:
+        1. Define a custom_row_func that takes an instance and returns a list
+           containing the instance's name in uppercase.
+        2. Create a ModelTable object with the custom_row_func.
+        3. Call the row_func method of the ModelTable object with the first instance.
+        4. Assert that the returned row is a list containing the instance's name
+           in uppercase.
+        """
         def custom_row_func(instance):
+            """
+            Converts the name attribute of the given instance to uppercase and returns it in a list.
+
+            Args:
+                instance (object): An object that has a 'name' attribute.
+
+            Returns:
+                list: A list containing the uppercase version of the instance's name.
+            """
             return [instance.name.upper()]
+
         table = ModelTable(self.page, self.columns, custom_row_func)
         row = table.row_func(self.instances[0])
         self.assertEqual(row, [self.instances[0].name.upper()])
 
     def test_rows(self):
+        """
+        Tests the rows of the table.
+
+        This test checks that the number of rows in the table is 10 and that the first row
+        contains the name of the first instance.
+
+        Assertions:
+            - The number of rows in the table is 10.
+            - The first row contains the name of the first instance.
+        """
         rows = list(self.table.rows)
         self.assertEqual(len(rows), 10)
         self.assertEqual(rows[0], [self.instances[0].name])
 
     def test_columns(self):
+        """
+        Test that the columns of the table are as expected.
+
+        This test checks if the 'columns' attribute of the 'table' object
+        contains exactly one column named "Name".
+        """
         self.assertEqual(self.table.columns, ["Name"])
 
     def test_has_previous(self):
+        """
+        Test the `has_previous` property of the table.
+
+        This test verifies that the `has_previous` property of the table is 
+        correctly set based on the paginator's current page. Initially, it 
+        asserts that `has_previous` is False when on the first page. Then, 
+        it moves to the second page and asserts that `has_previous` is True.
+        """
         self.assertFalse(self.table.has_previous)
         page = self.paginator.page(2)
         table = ModelTable(page, self.columns)
         self.assertTrue(table.has_previous)
 
     def test_has_next(self):
+        """
+        Test the `has_next` property of the table.
+
+        This test verifies that the `has_next` property of the table is correctly
+        set based on the paginator's current page. It checks that the property is
+        True when there are more pages available and False when there are no more
+        pages.
+
+        Assertions:
+            - The `has_next` property should be True when the table is initialized
+              with the first page of the paginator.
+            - The `has_next` property should be False when the table is initialized
+              with the second page of the paginator.
+        """
         self.assertTrue(self.table.has_next)
         page = self.paginator.page(2)
         table = ModelTable(page, self.columns)
         self.assertFalse(table.has_next)
 
     def test_previous_page_number(self):
+        """
+        Test that the previous_page_number property of the ModelTable class
+        correctly returns the previous page number.
+
+        This test creates a paginator page object for page 2 and a ModelTable
+        instance using this page and the provided columns. It then asserts that
+        the previous_page_number property of the ModelTable instance is 1.
+        """
         page = self.paginator.page(2)
         table = ModelTable(page, self.columns)
         self.assertEqual(table.previous_page_number, 1)
 
     def test_next_page_number(self):
+        """
+        Test that the next_page_number property of the table returns the expected value.
+
+        This test checks if the next_page_number property of the table instance
+        returns 2, indicating that the pagination logic is functioning correctly.
+        """
         self.assertEqual(self.table.next_page_number, 2)
 
     def test_page_number(self):
+        """
+        Test that the page number of the table is correctly set to 1.
+        """
         self.assertEqual(self.table.page_number, 1)
 
     def test_page_size(self):
+        """
+        Test that the page size of the table is set to 10.
+
+        This test verifies that the `page_size` attribute of the `table` object
+        is correctly initialized to 10.
+        """
         self.assertEqual(self.table.page_size, 10)
 
     def test_render(self):
+        """
+        Tests the render method of the table.
+
+        This test checks if the rendered output of the table contains the string "Name".
+        """
         rendered = self.table.render()
         self.assertIn("Name", rendered)
 
     def test_row_column_mismatch(self):
+        """
+        Test case to verify that a ValueError is raised when there is a mismatch
+        between the number of columns defined and the number of columns returned
+        by the custom row function.
+        The custom_row_func returns a list with two elements, while the table is
+        expected to have a different number of columns. This should trigger a
+        ValueError when attempting to iterate over the table rows.
+        """
         def custom_row_func(instance):
+            """
+            Generates a list containing the name attribute of the given instance twice.
+
+            Args:
+                instance: An object that has a 'name' attribute.
+
+            Returns:
+                A list containing the 'name' attribute of the instance repeated twice.
+            """
             return [instance.name, instance.name]
+
         table = ModelTable(self.page, self.columns, custom_row_func)
         with self.assertRaises(ValueError):
             list(table.rows)
