@@ -90,7 +90,7 @@ class Sightseeing(models.Model):
 
     name = models.CharField(max_length=100)
     city = models.ForeignKey(City, on_delete=models.CASCADE)
-    cost = models.FloatField()
+    cost = models.FloatField(null=True, blank=True)
     description = models.TextField()
     rating = models.FloatField(null=True, blank=True)
 
