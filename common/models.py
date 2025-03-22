@@ -13,8 +13,11 @@ Models:
     SightseeingPlan: Represents a relationship between a sightseeing spot and a plan with an order.
 """
 
-from typing import Set
+from typing import Set, Union
 from django.db import models
+from django.utils.safestring import SafeText
+
+from common.components.tables import ModelTable
 
 
 class Country(models.Model):
@@ -28,6 +31,8 @@ class Country(models.Model):
     """
 
     name = models.CharField(max_length=100, primary_key=True)
+
+    city_table: Union[str, SafeText]
 
     def __str__(self):
         return self.name
@@ -71,6 +76,46 @@ class City(models.Model):
 
     def __str__(self) -> str:
         return self.name
+
+    @property
+    def sightseeings(self):
+        """
+        Retrieves all sightseeing spots in the city.
+
+        Returns:
+            QuerySet: A QuerySet containing all Sightseeing objects in the city.
+        """
+        return Sightseeing.objects.filter(city=self)
+
+    @property
+    def hotels(self):
+        """
+        Retrieves all hotels in the city.
+
+        Returns:
+            QuerySet: A QuerySet containing all Hotel objects in the city.
+        """
+        return Hotel.objects.filter(city=self)
+
+    @property
+    def sightseeing_plans(self):
+        """
+        Retrieves all sightseeing plans in the city.
+
+        Returns:
+            QuerySet: A QuerySet containing all SightseeingPlan objects in the city.
+        """
+        return SightseeingPlan.objects.filter(plan__rooms__hotel__city=self)
+
+    @property
+    def plans(self):
+        """
+        Retrieves all plans associated with the city.
+
+        Returns:
+            QuerySet: A QuerySet containing all Plan objects associated with the city.
+        """
+        return self.sightseeing_plans.values_list("plan", flat=True)
 
 
 class Sightseeing(models.Model):
