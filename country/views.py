@@ -30,7 +30,7 @@ from common.components.tables import pagination_handle
 from common.models import Country
 
 from .forms import CountryForm
-from .tables import CountryTable
+from .tables import CityTable, CountryTable
 
 
 def country_list(request):
@@ -114,4 +114,5 @@ def view_country(request, country_id):
 
     template = loader.get_template("view_country.html")
     country = Country.objects.get(pk=country_id)
+    country.city_table = CityTable(Paginator(country.cities.all(), 100).page(1)).render()
     return HttpResponse(template.render({"country": country}, request))

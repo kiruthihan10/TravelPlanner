@@ -1,3 +1,5 @@
 {% extends "base.html" %} {% block content %}
-
+    <h1 class="is-size-1 has-text-centered">{{country}}</h1>
+    <h2 class="is-size-2 has-text-centered">Cities</h2>
+    {{country.city_table}}
 {% endblock %}
