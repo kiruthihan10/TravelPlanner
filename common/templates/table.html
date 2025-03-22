@@ -9,8 +9,13 @@
         </thead>
         <tbody>
             {% for row in table.rows %}
-            <tr>
-                {% for item in row %}
+            <tr
+                {% if row.link %}
+                    data-url={{ row.link }}
+                    style="cursor: pointer;"
+                    class="clickable-row"
+                {% endif %}>
+                {% for item in row.items %}
                     <td>{{ item }}</td>
                 {% endfor %}
             </tr>

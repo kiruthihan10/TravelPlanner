@@ -8,6 +8,7 @@ Classes:
 from typing import List, Union
 
 from django.core.paginator import Page
+from django.db.models import Model
 
 from common.models import Country
 from common.components.tables import ModelTable
@@ -48,3 +49,6 @@ class CountryTable(ModelTable):
             List: A list containing the country's name and the count of its cities.
         """
         return [instance.name, instance.cities.count()]
+
+    def default_row_link_func(self, country: Model) -> str:
+        return country.pk

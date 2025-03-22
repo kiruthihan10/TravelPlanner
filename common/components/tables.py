@@ -1,5 +1,5 @@
 from abc import ABC
-from typing import List
+from typing import List, Union
 from django.db.models import Model
 from django.core.paginator import Page
 from django.http import HttpRequest
@@ -23,6 +23,15 @@ def pagination_handle(request: HttpRequest, default_size=10, default_page_number
     return size, page_number
 
 
+class TableRow(ABC):
+    items: List[str] = []
+    link: Union[str, None] = None
+
+    def __init__(self, items: List[str], link: Union[str, None] = None) -> None:
+        self.items = items
+        self.link = link
+
+
 class ModelTable(ABC):
 
     def __init__(self, instances: Page, columns: List[str], row_func=None) -> None:
@@ -37,6 +46,9 @@ class ModelTable(ABC):
     def default_row_func(self, instance: Model) -> List:
         return [getattr(instance, column) for column in self._columns]
 
+    def default_row_link_func(self, _: Model) -> Union[str, None]:
+        return None
+
     @property
     def rows(self):
         for instance in self.instances:
@@ -45,7 +57,7 @@ class ModelTable(ABC):
                 raise ValueError(
                     "Row function does not return the correct number of columns."
                 )
-            yield row
+            yield TableRow(row, self.default_row_link_func(instance))
 
     @property
     def columns(self):
