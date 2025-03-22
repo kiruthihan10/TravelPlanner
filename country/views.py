@@ -100,3 +100,18 @@ def create_country(request):
     else:
         return HttpResponse(status=405)
     return HttpResponse(template.render({"form": country_form.render_form()}, request))
+
+
+def view_country(request, country_id):
+    """
+    Handles the request to view a country.
+
+    Args:
+        request (HttpRequest): The HTTP request object.
+        country_id (int): The ID of the country to view."
+
+    """
+
+    template = loader.get_template("view_country.html")
+    country = Country.objects.get(pk=country_id)
+    return HttpResponse(template.render({"country": country}, request))
